@@ -1,1090 +1,277 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicación de Exámenes</title>
-    <style>
-        :root {
-            --primary-color: #4a6da7;
-            --secondary-color: #304878;
-            --accent-color: #ff6b6b;
-            --success-color: #4caf50;
-            --warning-color: #ff9800;
-            --error-color: #f44336;
-            --background-color: #f5f7fa;
-            --text-color: #333;
-            --shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        h1, h2, h3 {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-        
-        h1 {
-            text-align: center;
-            margin-top: 10px;
-        }
-        
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            margin: 5px;
-        }
-        
-        button:hover {
-            background-color: var(--secondary-color);
-        }
-        
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        
-        input, select {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            width: 100%;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-        }
-        
-        .option {
-            display: block;
-            background-color: #f9f9f9;
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            border: 1px solid #ddd;
-            transition: all 0.2s;
-        }
-        
-        .option:hover {
-            background-color: #f0f0f0;
-        }
-        
-        .option.selected {
-            background-color: #e3f2fd;
-            border-color: var(--primary-color);
-        }
-        
-        .question-container {
-            margin-bottom: 30px;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        
-        .timer {
-            font-size: 20px;
-            text-align: center;
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .progress {
-            height: 10px;
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background-color: var(--primary-color);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .checkbox-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-        }
-        
-        .checkbox-item input {
-            width: auto;
-            margin-right: 8px;
-            margin-bottom: 0;
-        }
-        
-        .results-container {
-            text-align: center;
-        }
-        
-        .results-container h2 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        
-        .score {
-            font-size: 24px;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        /* Estilos para los botones de gestión de banco de preguntas */
-        .admin-button {
-            background-color: var(--secondary-color);
-            margin-top: 20px;
-        }
-        
-        .admin-section {
-            margin-top: 30px;
-        }
-        
-        .question-form {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        
-        .question-list {
-            margin-top: 20px;
-        }
-        
-        .question-item {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            position: relative;
-        }
-        
-        .delete-btn {
-            background-color: var(--accent-color);
-            padding: 5px 10px;
-            position: absolute;
-            right: 10px;
-            top: 10px;
-        }
-        
-        /* Estilos para la pantalla de revisión */
-        .review-question {
-            margin-bottom: 30px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
-        }
-        
-        .review-question-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .review-question-number {
-            font-weight: bold;
-            color: var(--secondary-color);
-        }
-        
-        .review-question-theme {
-            color: var(--primary-color);
-            font-style: italic;
-        }
-        
-        .review-option {
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            border: 1px solid #ddd;
-            position: relative;
-        }
-        
-        .review-option.correct {
-            background-color: rgba(76, 175, 80, 0.1);
-            border-color: var(--success-color);
-        }
-        
-        .review-option.incorrect {
-            background-color: rgba(244, 67, 54, 0.1);
-            border-color: var(--error-color);
-        }
-        
-        .review-option.user-selected {
-            font-weight: bold;
-        }
-        
-        .review-option .status-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        
-        .status-correct {
-            color: var(--success-color);
-        }
-        
-        .status-incorrect {
-            color: var(--error-color);
-        }
-        
-        .review-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-        }
-        
-        .review-summary {
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-        }
-        
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            
-            .controls {
-                flex-direction: column;
-            }
-            
-            .controls button {
-                margin-bottom: 10px;
-                width: 100%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuestra boda</title>
+  <meta name="description" content="Web de boda con información, RSVP y playlist." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./styles.css" />
+  <script defer src="./app.js"></script>
 </head>
 <body>
-    <!-- Pantalla de inicio -->
-    <div id="startScreen" class="container">
-        <h1>Aplicación de Exámenes</h1>
-        
-        <div>
-            <label for="num-questions">Número de preguntas:</label>
-            <input type="number" id="num-questions" min="1" max="100" value="50">
-            
-            <label>Selecciona los temas:</label>
-            <div id="themes-container" class="checkbox-container"></div>
-            
-            <button id="start-exam">Iniciar Examen</button>
-            <button id="manage-questions" class="admin-button">Gestionar Banco de Preguntas</button>
-        </div>
-    </div>
-    
-    <!-- Pantalla de examen -->
-    <div id="examScreen" class="hidden">
-        <div class="timer" id="timer">60:00</div>
-        <div class="progress">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
-        
-        <div id="question-container" class="container question-container">
-            <h2 id="question-text">Pregunta</h2>
-            <p id="question-theme" style="color: var(--secondary-color); margin-bottom: 15px;"></p>
-            
-            <div id="options-container">
-                <div class="option" data-index="0">Opción 1</div>
-                <div class="option" data-index="1">Opción 2</div>
-                <div class="option" data-index="2">Opción 3</div>
-            </div>
-        </div>
-        
-        <div class="controls">
-            <button id="prev-button">Anterior</button>
-            <button id="next-button">Siguiente</button>
-            <button id="finish-button">Finalizar Examen</button>
-        </div>
-    </div>
-    
-    <!-- Pantalla de resultados -->
-    <div id="resultsScreen" class="hidden">
-        <div class="container results-container">
-            <h2>Resultados del Examen</h2>
-            
-            <div class="score" id="final-score">Puntuación: 0/10</div>
-            
-            <div class="stats">
-                <div class="stat-item">
-                    <div>Aciertos</div>
-                    <div class="stat-value" id="correct-answers">0</div>
-                </div>
-                <div class="stat-item">
-                    <div>Errores</div>
-                    <div class="stat-value" id="wrong-answers">0</div>
-                </div>
-                <div class="stat-item">
-                    <div>Sin responder</div>
-                    <div class="stat-value" id="unanswered">0</div>
-                </div>
-            </div>
-            
-            <button id="restart-button">Volver al Inicio</button>
-            <button id="review-button">Revisar Respuestas</button>
-        </div>
-    </div>
-    
-    <!-- Pantalla de revisión de respuestas -->
-    <div id="reviewScreen" class="hidden">
-        <div class="container">
-            <h2>Revisión de Respuestas</h2>
-            
-            <div class="review-summary">
-                <div id="review-score">Puntuación: 0/10</div>
-                <div>Aciertos: <span id="review-correct">0</span> | Errores: <span id="review-wrong">0</span> | Sin responder: <span id="review-unanswered">0</span></div>
-            </div>
-            
-            <div id="review-questions-container">
-                <!-- Aquí se cargarán las preguntas para revisión -->
-            </div>
-            
-            <div class="controls">
-                <button id="back-to-results">Volver a Resultados</button>
-                <button id="restart-from-review">Volver al Inicio</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Pantalla de gestión de banco de preguntas -->
-    <div id="questionBankScreen" class="hidden">
-        <div class="container">
-            <h2>Gestión del Banco de Preguntas</h2>
-            
-            <div class="question-form">
-                <h3>Añadir Nueva Pregunta</h3>
-                
-                <label for="new-theme">Tema:</label>
-                <input type="text" id="new-theme" list="existing-themes">
-                <datalist id="existing-themes"></datalist>
-                
-                <label for="new-question">Pregunta:</label>
-                <input type="text" id="new-question">
-                
-                <label for="option1">Opción 1:</label>
-                <input type="text" id="option1">
-                
-                <label for="option2">Opción 2:</label>
-                <input type="text" id="option2">
-                
-                <label for="option3">Opción 3:</label>
-                <input type="text" id="option3">
-                
-                <label for="correct-option">Respuesta Correcta:</label>
-                <select id="correct-option">
-                    <option value="0">Opción 1</option>
-                    <option value="1">Opción 2</option>
-                    <option value="2">Opción 3</option>
-                </select>
-                
-                <button id="add-question">Añadir Pregunta</button>
-            </div>
-            
-            <label for="filter-theme">Filtrar por tema:</label>
-            <select id="filter-theme">
-                <option value="all">Todos los temas</option>
-            </select>
-            
-            <div id="question-list" class="question-list"></div>
-            
-            <button id="back-to-start">Volver al Inicio</button>
-        </div>
-    </div>
-    
-    <script src="./bank.js"></script>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-    <script>
-        // Modelo de datos
-        // let questionBank = [];
-        let examQuestions = [];
-        let currentQuestionIndex = 0;
-        let userAnswers = [];
-        let examTime = 0;
-        let timer;
-        let secondsLeft = 0;
-        let examResults = null;
-        
-        // Obtener elementos del DOM
-        const startScreen = document.getElementById('startScreen');
-        const examScreen = document.getElementById('examScreen');
-        const resultsScreen = document.getElementById('resultsScreen');
-        const reviewScreen = document.getElementById('reviewScreen');
-        const questionBankScreen = document.getElementById('questionBankScreen');
-        
-        const numQuestionsInput = document.getElementById('num-questions');
-        const themesContainer = document.getElementById('themes-container');
-        const startExamButton = document.getElementById('start-exam');
-        const manageQuestionsButton = document.getElementById('manage-questions');
-        
-        const timerElement = document.getElementById('timer');
-        const progressBar = document.getElementById('progress-bar');
-        const questionText = document.getElementById('question-text');
-        const questionTheme = document.getElementById('question-theme');
-        const optionsContainer = document.getElementById('options-container');
-        const prevButton = document.getElementById('prev-button');
-        const nextButton = document.getElementById('next-button');
-        const finishButton = document.getElementById('finish-button');
-        
-        const finalScore = document.getElementById('final-score');
-        const correctAnswers = document.getElementById('correct-answers');
-        const wrongAnswers = document.getElementById('wrong-answers');
-        const unanswered = document.getElementById('unanswered');
-        const restartButton = document.getElementById('restart-button');
-        const reviewButton = document.getElementById('review-button');
-        
-        const reviewQuestionsContainer = document.getElementById('review-questions-container');
-        const backToResultsButton = document.getElementById('back-to-results');
-        const restartFromReviewButton = document.getElementById('restart-from-review');
-        const reviewScoreElement = document.getElementById('review-score');
-        const reviewCorrectElement = document.getElementById('review-correct');
-        const reviewWrongElement = document.getElementById('review-wrong');
-        const reviewUnansweredElement = document.getElementById('review-unanswered');
-        
-        const newThemeInput = document.getElementById('new-theme');
-        const newQuestionInput = document.getElementById('new-question');
-        const option1Input = document.getElementById('option1');
-        const option2Input = document.getElementById('option2');
-        const option3Input = document.getElementById('option3');
-        const correctOptionSelect = document.getElementById('correct-option');
-        const addQuestionButton = document.getElementById('add-question');
-        const existingThemesDatalist = document.getElementById('existing-themes');
-        const filterThemeSelect = document.getElementById('filter-theme');
-        const questionList = document.getElementById('question-list');
-        const backToStartButton = document.getElementById('back-to-start');
-        
-        // Cargar banco de preguntas del localStorage
-        function loadQuestionBank() {
-            const savedBank = localStorage.getItem('questionBank');
-            if (savedBank) {
-                questionBank = JSON.parse(savedBank);
-            } else {
-                // Si no hay banco de preguntas, cargar algunos ejemplos
-                questionBank = [
-                    {
-                        theme: 'Historia',
-                        question: '¿En qué año comenzó la Segunda Guerra Mundial?',
-                        options: ['1939', '1941', '1945'],
-                        correctOption: 0
-                    },
-                    {
-                        theme: 'Historia',
-                        question: '¿Quién fue el primer presidente de los Estados Unidos?',
-                        options: ['Thomas Jefferson', 'George Washington', 'Abraham Lincoln'],
-                        correctOption: 1
-                    },
-                    {
-                        theme: 'Ciencias',
-                        question: '¿Cuál es el símbolo químico del oro?',
-                        options: ['Ag', 'Au', 'Fe'],
-                        correctOption: 1
-                    },
-                    {
-                        theme: 'Ciencias',
-                        question: '¿Cuál es el planeta más grande del sistema solar?',
-                        options: ['Tierra', 'Júpiter', 'Saturno'],
-                        correctOption: 1
-                    },
-                    {
-                        theme: 'Matemáticas',
-                        question: '¿Cuánto es 9 × 9?',
-                        options: ['81', '90', '99'],
-                        correctOption: 0
-                    },
-                    {
-                        theme: 'Matemáticas',
-                        question: '¿Cuál es el valor de π (pi) aproximado a dos decimales?',
-                        options: ['3.14', '3.41', '3.16'],
-                        correctOption: 0
-                    }
-                ];
-                saveQuestionBank();
-            }
-        }
-        
-        // Guardar banco de preguntas en localStorage
-        function saveQuestionBank() {
-            localStorage.setItem('questionBank', JSON.stringify(questionBank));
-        }
-        
-        // Cargar temas disponibles
-        function loadThemes() {
-            const themes = [...new Set(questionBank.map(q => q.theme))];
-            
-            // Limpiar contenedor de temas
-            themesContainer.innerHTML = '';
-            
-            // Crear checkboxes para cada tema
-            themes.forEach(theme => {
-                const checkboxItem = document.createElement('div');
-                checkboxItem.className = 'checkbox-item';
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = `theme-${theme}`;
-                checkbox.value = theme;
-                checkbox.checked = true;
-                
-                const label = document.createElement('label');
-                label.htmlFor = `theme-${theme}`;
-                label.textContent = theme;
-                
-                checkboxItem.appendChild(checkbox);
-                checkboxItem.appendChild(label);
-                themesContainer.appendChild(checkboxItem);
-            });
-            
-            // Actualizar datalist de temas existentes
-            existingThemesDatalist.innerHTML = '';
-            themes.forEach(theme => {
-                const option = document.createElement('option');
-                option.value = theme;
-                existingThemesDatalist.appendChild(option);
-            });
-            
-            // Actualizar select de filtrado
-            const currentValue = filterThemeSelect.value;
-            filterThemeSelect.innerHTML = '<option value="all">Todos los temas</option>';
-            themes.forEach(theme => {
-                const option = document.createElement('option');
-                option.value = theme;
-                option.textContent = theme;
-                filterThemeSelect.appendChild(option);
-            });
-            filterThemeSelect.value = currentValue;
-        }
-        
-        // Generar examen
-        function generateExam() {
-            const numQuestions = parseInt(numQuestionsInput.value);
-            
-            // Obtener temas seleccionados
-            const selectedThemes = Array.from(themesContainer.querySelectorAll('input[type="checkbox"]:checked'))
-                .map(checkbox => checkbox.value);
-            
-            if (selectedThemes.length === 0) {
-                alert('Por favor, selecciona al menos un tema');
-                return false;
-            }
-            
-            // Filtrar preguntas por temas seleccionados
-            const availableQuestions = questionBank.filter(q => selectedThemes.includes(q.theme));
-            
-            if (availableQuestions.length === 0) {
-                alert('No hay preguntas disponibles para los temas seleccionados');
-                return false;
-            }
-            
-            if (availableQuestions.length < numQuestions) {
-                alert(`Solo hay ${availableQuestions.length} preguntas disponibles. Reduce el número de preguntas o añade más al banco.`);
-                return false;
-            }
-            
-            // Agrupar preguntas por tema
-            const questionsByTheme = {};
-            selectedThemes.forEach(theme => {
-                questionsByTheme[theme] = availableQuestions.filter(q => q.theme === theme);
-            });
-            
-            // Calcular cuántas preguntas por tema para distribuir equitativamente
-            const questionsPerTheme = Math.floor(numQuestions / selectedThemes.length);
-            let remainingQuestions = numQuestions - (questionsPerTheme * selectedThemes.length);
-            
-            // Seleccionar preguntas ponderando por tema
-            examQuestions = [];
-            
-            selectedThemes.forEach(theme => {
-                // Determinar cuántas preguntas seleccionar de este tema
-                let numToSelect = questionsPerTheme;
-                if (remainingQuestions > 0) {
-                    numToSelect++;
-                    remainingQuestions--;
-                }
-                
-                // Asegurarse de que no se seleccionen más preguntas de las disponibles
-                numToSelect = Math.min(numToSelect, questionsByTheme[theme].length);
-                
-                // Seleccionar preguntas aleatoriamente
-                const themeQuestions = [...questionsByTheme[theme]];
-                for (let i = 0; i < numToSelect; i++) {
-                    const randomIndex = Math.floor(Math.random() * themeQuestions.length);
-                    examQuestions.push(themeQuestions[randomIndex]);
-                    themeQuestions.splice(randomIndex, 1);
-                }
-            });
-            
-            // Mezclar las preguntas
-            examQuestions = shuffleArray(examQuestions);
-            
-            // Inicializar respuestas del usuario
-            userAnswers = Array(examQuestions.length).fill(null);
-            
-            // Calcular tiempo de examen (proporcional a 60 minutos para 50 preguntas)
-            examTime = Math.ceil((numQuestions / 50) * 60);
-            secondsLeft = examTime * 60;
-            
-            return true;
-        }
-        
-        // Mostrar la pregunta actual
-        function showCurrentQuestion() {
-            const currentQuestion = examQuestions[currentQuestionIndex];
-            
-            questionText.textContent = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
-            questionTheme.textContent = `Tema: ${currentQuestion.theme}`;
-            
-            // Actualizar opciones
-            const options = optionsContainer.querySelectorAll('.option');
-            options.forEach((option, index) => {
-                option.textContent = currentQuestion.options[index];
-                
-                // Marcar la opción seleccionada por el usuario
-                if (userAnswers[currentQuestionIndex] === index) {
-                    option.classList.add('selected');
-                } else {
-                    option.classList.remove('selected');
-                }
-            });
-            
-            // Actualizar botones de navegación
-            prevButton.disabled = currentQuestionIndex === 0;
-            nextButton.disabled = currentQuestionIndex === examQuestions.length - 1;
-            
-            // Actualizar barra de progreso
-            const progress = ((currentQuestionIndex + 1) / examQuestions.length) * 100;
-            progressBar.style.width = `${progress}%`;
-        }
-        
-        // Actualizar el temporizador
-        function updateTimer() {
-            const minutes = Math.floor(secondsLeft / 60);
-            const seconds = secondsLeft % 60;
-            
-            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (secondsLeft <= 0) {
-                clearInterval(timer);
-                finishExam();
-            } else {
-                secondsLeft--;
-            }
-        }
-        
-        // Calcular la puntuación del examen
-        function calculateScore() {
-            const numQuestions = examQuestions.length;
-            const pointsPerQuestion = 10 / numQuestions;
-            
-            let correct = 0;
-            let wrong = 0;
-            let notAnswered = 0;
-            
-            userAnswers.forEach((answer, index) => {
-                if (answer === null) {
-                    notAnswered++;
-                } else if (answer === examQuestions[index].correctOption) {
-                    correct++;
-                } else {
-                    wrong++;
-                }
-            });
-            
-            // Calcular puntuación (acierto: 0.2, error: -0.1, en blanco: 0)
-            // Estos valores son para un examen de 50 preguntas, ajustar proporcionalmente
-            const correctPoints = (0.2 * 50 / numQuestions) * correct;
-            const wrongPoints = (0.1 * 50 / numQuestions) * wrong;
-            
-            const totalScore = correctPoints - wrongPoints;
-            const normalizedScore = Math.max(0, totalScore).toFixed(2);
-            
-            return {
-                score: normalizedScore,
-                correct,
-                wrong,
-                notAnswered
-            };
-        }
-        
-        // Finalizar el examen
-        function finishExam() {
-            clearInterval(timer);
-            
-            examResults = calculateScore();
-            
-            finalScore.textContent = `Puntuación: ${examResults.score}/10`;
-            correctAnswers.textContent = examResults.correct;
-            wrongAnswers.textContent = examResults.wrong;
-            unanswered.textContent = examResults.notAnswered;
-            
-            examScreen.classList.add('hidden');
-            resultsScreen.classList.remove('hidden');
-        }
-        
-        // Función para mezclar array (algoritmo Fisher-Yates)
-        function shuffleArray(array) {
-            const newArray = [...array];
-            for (let i = newArray.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-            }
-            return newArray;
-        }
-        
-        // Mostrar la lista de preguntas en la pantalla de gestión
-        function showQuestionList() {
-            const filterTheme = filterThemeSelect.value;
-            
-            // Filtrar preguntas por tema si es necesario
-            const filteredQuestions = filterTheme === 'all' 
-                ? questionBank 
-                : questionBank.filter(q => q.theme === filterTheme);
-            
-            // Limpiar lista de preguntas
-            questionList.innerHTML = '';
-            
-            // Añadir cada pregunta a la lista
-            filteredQuestions.forEach((question, index) => {
-                const questionItem = document.createElement('div');
-                questionItem.className = 'question-item';
-                
-                const questionContent = document.createElement('div');
-                questionContent.innerHTML = `
-                    <strong>${question.theme}</strong>: ${question.question}<br>
-                    <small>Opciones: 1) ${question.options[0]} | 2) ${question.options[1]} | 3) ${question.options[2]}</small><br>
-                    <small>Respuesta correcta: ${parseInt(question.correctOption) + 1}</small>
-                `;
-                
-                const deleteButton = document.createElement('button');
-                deleteButton.className = 'delete-btn';
-                deleteButton.textContent = 'Eliminar';
-                deleteButton.addEventListener('click', () => {
-                    // Encontrar el índice real en el banco de preguntas
-                    const realIndex = questionBank.findIndex(q => 
-                        q.question === question.question && 
-                        q.theme === question.theme && 
-                        q.options.join() === question.options.join() &&
-                        q.correctOption === question.correctOption
-                    );
-                    
-                    if (realIndex !== -1) {
-                        questionBank.splice(realIndex, 1);
-                        saveQuestionBank();
-                        loadThemes();
-                        showQuestionList();
-                    }
-                });
-                
-                questionItem.appendChild(questionContent);
-                questionItem.appendChild(deleteButton);
-                questionList.appendChild(questionItem);
-            });
-        }
-        
-        // Mostrar la revisión de preguntas
-        function showReviewQuestions() {
-            // Actualizar resumen de resultados
-            reviewScoreElement.textContent = `Puntuación: ${examResults.score}/10`;
-            reviewCorrectElement.textContent = examResults.correct;
-            reviewWrongElement.textContent = examResults.wrong;
-            reviewUnansweredElement.textContent = examResults.notAnswered;
-            
-            // Limpiar contenedor de preguntas
-            reviewQuestionsContainer.innerHTML = '';
-            
-            // Añadir cada pregunta con su revisión
-            examQuestions.forEach((question, index) => {
-                const reviewQuestionDiv = document.createElement('div');
-                reviewQuestionDiv.className = 'review-question';
-                
-                // Encabezado de la pregunta
-                const headerDiv = document.createElement('div');
-                headerDiv.className = 'review-question-header';
-                
-                const questionNumberDiv = document.createElement('div');
-                questionNumberDiv.className = 'review-question-number';
-                questionNumberDiv.textContent = `Pregunta ${index + 1}`;
-                
-                const themeDiv = document.createElement('div');
-                themeDiv.className = 'review-question-theme';
-                themeDiv.textContent = question.theme;
-                
-                headerDiv.appendChild(questionNumberDiv);
-                headerDiv.appendChild(themeDiv);
-                
-                // Texto de la pregunta
-                const questionDiv = document.createElement('div');
-                questionDiv.textContent = question.question;
-                questionDiv.style.marginBottom = '15px';
-                questionDiv.style.fontWeight = 'bold';
-                
-                reviewQuestionDiv.appendChild(headerDiv);
-                reviewQuestionDiv.appendChild(questionDiv);
-                
-                // Opciones
-                const optionsDiv = document.createElement('div');
-                
-                question.options.forEach((option, optionIndex) => {
-                    const optionDiv = document.createElement('div');
-                    optionDiv.className = 'review-option';
-                    
-                    // Determinar si esta opción fue seleccionada por el usuario
-                    const userSelected = userAnswers[index] === optionIndex;
-                    
-                    // Determinar si esta es la opción correcta
-                    const isCorrect = question.correctOption === optionIndex;
-                    
-                    // Añadir clases según el estado
-                    if (userSelected) {
-                        optionDiv.classList.add('user-selected');
-                    }
-                    
-                    if (isCorrect) {
-                        optionDiv.classList.add('correct');
-                    } else if (userSelected) {
-                        optionDiv.classList.add('incorrect');
-                    }
-                    
-                    // Añadir el texto de la opción
-                    optionDiv.textContent = option;
-                    
-                    // Añadir icono de estado
-                    const statusSpan = document.createElement('span');
-                    statusSpan.className = 'status-icon';
-                    
-                    if (isCorrect) {
-                        statusSpan.textContent = '✓';
-                        statusSpan.classList.add('status-correct');
-                    } else if (userSelected) {
-                        statusSpan.textContent = '✗';
-                        statusSpan.classList.add('status-incorrect');
-                    }
-                    
-                    optionDiv.appendChild(statusSpan);
-                    optionsDiv.appendChild(optionDiv);
-                });
-                
-                reviewQuestionDiv.appendChild(optionsDiv);
-                
-                // Mensaje de evaluación
-                const evaluationDiv = document.createElement('div');
-                evaluationDiv.style.marginTop = '10px';
-                
-                if (userAnswers[index] === null) {
-                    evaluationDiv.textContent = 'No respondiste esta pregunta.';
-                    evaluationDiv.style.color = '#888';
-                } else if (userAnswers[index] === question.correctOption) {
-                    evaluationDiv.textContent = '¡Correcto!';
-                    evaluationDiv.style.color = 'var(--success-color)';
-                } else {
-                    evaluationDiv.textContent = `Incorrecto. La respuesta correcta es: ${question.options[question.correctOption]}`;
-                    evaluationDiv.style.color = 'var(--error-color)';
-                }
-                
-                reviewQuestionDiv.appendChild(evaluationDiv);
-                
-                // Añadir al contenedor principal
-                reviewQuestionsContainer.appendChild(reviewQuestionDiv);
-            });
-        }
-        
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            // Cargar banco de preguntas
-            loadQuestionBank();
-            loadThemes();
-            
-            // Botón para iniciar examen
-            startExamButton.addEventListener('click', () => {
-                if (generateExam()) {
-                    startScreen.classList.add('hidden');
-                    examScreen.classList.remove('hidden');
-                    
-                    // Mostrar primera pregunta
-                    currentQuestionIndex = 0;
-                    showCurrentQuestion();
-                    
-                    // Iniciar temporizador
-                    updateTimer();
-                    timer = setInterval(updateTimer, 1000);
-                }
-            });
-            
-            // Botón para gestionar banco de preguntas
-            manageQuestionsButton.addEventListener('click', () => {
-                startScreen.classList.add('hidden');
-                questionBankScreen.classList.remove('hidden');
-                showQuestionList();
-            });
-            
-            // Opciones de respuesta
-            optionsContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('option')) {
-                    // Desmarcar todas las opciones
-                    const options = optionsContainer.querySelectorAll('.option');
-                    options.forEach(option => option.classList.remove('selected'));
-                    
-                    // Marcar la opción seleccionada
-                    e.target.classList.add('selected');
-                    
-                    // Guardar respuesta
-                    userAnswers[currentQuestionIndex] = parseInt(e.target.dataset.index);
-                }
-            });
-            
-            // Botones de navegación
-            prevButton.addEventListener('click', () => {
-                if (currentQuestionIndex > 0) {
-                    currentQuestionIndex--;
-                    showCurrentQuestion();
-                }
-            });
-            
-            nextButton.addEventListener('click', () => {
-                if (currentQuestionIndex < examQuestions.length - 1) {
-                    currentQuestionIndex++;
-                    showCurrentQuestion();
-                }
-            });
-            
-            // Botón finalizar examen
-            finishButton.addEventListener('click', () => {
-                if (confirm('¿Estás seguro de que deseas finalizar el examen?')) {
-                    finishExam();
-                }
-            });
-            
-            // Botón volver al inicio desde resultados
-            restartButton.addEventListener('click', () => {
-                resultsScreen.classList.add('hidden');
-                startScreen.classList.remove('hidden');
-            });
-            
-            // Botón revisar respuestas
-            reviewButton.addEventListener('click', () => {
-                resultsScreen.classList.add('hidden');
-                reviewScreen.classList.remove('hidden');
-                showReviewQuestions();
-            });
-            
-            // Botón volver a resultados desde revisión
-            backToResultsButton.addEventListener('click', () => {
-                reviewScreen.classList.add('hidden');
-                resultsScreen.classList.remove('hidden');
-            });
-            
-            // Botón volver al inicio desde revisión
-            restartFromReviewButton.addEventListener('click', () => {
-                reviewScreen.classList.add('hidden');
-                startScreen.classList.remove('hidden');
-            });
-            
-            // Añadir nueva pregunta
-            addQuestionButton.addEventListener('click', () => {
-                const theme = newThemeInput.value.trim();
-                const question = newQuestionInput.value.trim();
-                const option1 = option1Input.value.trim();
-                const option2 = option2Input.value.trim();
-                const option3 = option3Input.value.trim();
-                const correctOption = parseInt(correctOptionSelect.value);
-                
-                if (!theme || !question || !option1 || !option2 || !option3) {
-                    alert('Por favor, completa todos los campos');
-                    return;
-                }
-                
-                // Añadir nueva pregunta
-                questionBank.push({
-                    theme,
-                    question,
-                    options: [option1, option2, option3],
-                    correctOption
-                });
-                
-                // Guardar y actualizar
-                saveQuestionBank();
-                loadThemes();
-                showQuestionList();
-                
-                // Limpiar formulario
-                newQuestionInput.value = '';
-                option1Input.value = '';
-                option2Input.value = '';
-                option3Input.value = '';
-                correctOptionSelect.value = '0';
-            });
-            
-            // Filtrar preguntas por tema
-            filterThemeSelect.addEventListener('change', showQuestionList);
-            
-            // Volver al inicio
-            backToStartButton.addEventListener('click', () => {
-                questionBankScreen.classList.add('hidden');
-                startScreen.classList.remove('hidden');
-            });
-        });
-    </script>
+  <div class="bg-slider" aria-hidden="true">
+    <div class="bg-slide active" style="background-image:url('https://picsum.photos/seed/boda1/1600/2200');"></div>
+    <div class="bg-slide" style="background-image:url('https://picsum.photos/seed/boda2/1600/2200');"></div>
+    <div class="bg-slide" style="background-image:url('https://picsum.photos/seed/boda3/1600/2200');"></div>
+  </div>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="#inicio" aria-label="Ir al inicio">
+        <span class="brand-mark">F</span>
+        <span>Francisco & Pareja</span>
+      </a>
+
+      <nav class="menu" aria-label="Navegación principal">
+        <a href="#historia">Nosotros</a>
+        <a href="#dia">El día</a>
+        <a href="#musica">Música</a>
+        <a href="#rsvp">RSVP</a>
+      </nav>
+
+      <button class="theme-toggle" type="button" aria-label="Cambiar tema" data-theme-toggle>
+        <span class="theme-toggle__sun">☀</span>
+        <span class="theme-toggle__moon">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="hero section" id="inicio">
+      <div class="container hero__content">
+        <p class="eyebrow reveal">Nos casamos</p>
+        <h1 class="hero__title reveal">Una celebración íntima, bonita y muy nuestra.</h1>
+        <p class="hero__text reveal">
+          Queremos compartir este día contigo. Aquí encontrarás la información importante,
+          la playlist y la confirmación de asistencia.
+        </p>
+
+        <div class="hero__actions reveal">
+          <a class="btn btn--primary" href="#rsvp">Confirmar asistencia</a>
+          <a class="btn btn--ghost" href="#dia">Ver detalles</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section story" id="historia">
+      <div class="container grid-two">
+        <div class="panel glass reveal">
+          <p class="eyebrow">Nuestra historia</p>
+          <h2>Un día para celebrar lo importante.</h2>
+          <p>
+            Este espacio está pensado para que tengas todo claro y en un solo sitio:
+            fecha, lugar, horarios, música y confirmación.
+          </p>
+        </div>
+
+        <div class="panel quote reveal">
+          <p>
+            “Nos hace ilusión celebrarlo con la gente que forma parte de nuestra vida.”
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section details" id="dia">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Información</p>
+          <h2>Datos del evento</h2>
+        </div>
+
+        <div class="cards">
+          <article class="card reveal">
+            <span class="card__label">Fecha</span>
+            <h3>12 de septiembre de 2026</h3>
+            <p>Añade aquí la fecha real de vuestra boda.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="card__label">Lugar</span>
+            <h3>Finca o salón</h3>
+            <p>Añade aquí dirección, ciudad y un enlace a Google Maps si quieres.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="card__label">Horario</span>
+            <h3>18:00 · Ceremonia</h3>
+            <p>19:30 · Cóctel · 21:00 · Cena · 00:00 · Fiesta.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section timeline">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Plan del día</p>
+          <h2>Así será la celebración</h2>
+        </div>
+
+        <div class="timeline-list">
+          <div class="timeline-item reveal">
+            <span>18:00</span>
+            <div>
+              <h3>Ceremonia</h3>
+              <p>Momento principal del día.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <span>19:30</span>
+            <div>
+              <h3>Cóctel</h3>
+              <p>Brindis, fotos y primer rato con todos.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <span>21:00</span>
+            <div>
+              <h3>Cena</h3>
+              <p>La parte tranquila antes de la fiesta.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <span>00:00</span>
+            <div>
+              <h3>Fiesta</h3>
+              <p>Música, baile y barra libre.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section music" id="musica">
+      <div class="container grid-two">
+        <div class="panel glass reveal">
+          <p class="eyebrow">Playlist</p>
+          <h2>La banda sonora del día</h2>
+          <p>
+            Sustituye el iframe por tu playlist y cambia también el enlace del botón para
+            que la gente pueda abrir la lista en Spotify y añadir canciones.
+          </p>
+
+          <div class="music-actions">
+            <a
+              class="btn btn--primary"
+              href="https://open.spotify.com/playlist/TU_PLAYLIST_ID"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir playlist
+            </a>
+
+            <a
+              class="btn btn--ghost"
+              href="https://open.spotify.com/playlist/TU_PLAYLIST_ID"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Añadir canción
+            </a>
+          </div>
+        </div>
+
+        <div class="panel spotify reveal">
+          <iframe
+            title="Playlist de Spotify"
+            style="border-radius:24px"
+            src="https://open.spotify.com/embed/playlist/TU_PLAYLIST_ID?utm_source=generator"
+            width="100%"
+            height="352"
+            frameborder="0"
+            allowfullscreen=""
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="section rsvp" id="rsvp">
+      <div class="container grid-two">
+        <div class="panel glass reveal">
+          <p class="eyebrow">Confirmación</p>
+          <h2>Responde en un minuto</h2>
+          <p>
+            Esta versión usa <code>rsvp.json</code> para pintar el estado actual. El formulario
+            genera una respuesta estructurada y te la envía por WhatsApp para que luego puedas
+            pegarla en el JSON del repositorio.
+          </p>
+
+          <div class="stats" id="stats">
+            <div class="stat">
+              <strong id="totalGuests">0</strong>
+              <span>Invitados confirmados</span>
+            </div>
+            <div class="stat">
+              <strong id="totalComing">0</strong>
+              <span>Respuestas sí</span>
+            </div>
+            <div class="stat">
+              <strong id="totalDeclined">0</strong>
+              <span>Respuestas no</span>
+            </div>
+          </div>
+        </div>
+
+        <form class="panel form-panel reveal" id="rsvpForm">
+          <label>
+            Nombre y apellidos
+            <input type="text" id="name" name="name" placeholder="Tu nombre" required />
+          </label>
+
+          <label>
+            ¿Vendrás?
+            <select id="attending" name="attending" required>
+              <option value="si">Sí, allí estaré</option>
+              <option value="no">No podré ir</option>
+            </select>
+          </label>
+
+          <label>
+            Número de asistentes
+            <input type="number" id="guests" name="guests" min="1" max="6" value="1" required />
+          </label>
+
+          <label>
+            Canción sugerida
+            <input type="text" id="song" name="song" placeholder="Tu canción favorita" />
+          </label>
+
+          <label>
+            Mensaje
+            <textarea id="message" name="message" rows="4" placeholder="Escribe algo bonito"></textarea>
+          </label>
+
+          <button class="btn btn--primary btn--full" type="submit">
+            Enviar respuesta
+          </button>
+
+          <p class="form-note" id="formNote">
+            Al pulsar, se abrirá WhatsApp con tu respuesta preparada.
+          </p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>Con muchísima ilusión, Francisco & Pareja.</p>
+      <a href="#inicio">Volver arriba</a>
+    </div>
+  </footer>
 </body>
 </html>
