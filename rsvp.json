@@ -1,0 +1,20 @@
+{
+  "respuestas": [
+    {
+      "name": "Ana y Luis",
+      "attending": true,
+      "guests": 2,
+      "song": "Viva la Vida",
+      "message": "Qué ganas de celebrarlo con vosotros",
+      "createdAt": "2026-05-27T18:00:00.000Z"
+    },
+    {
+      "name": "Marta",
+      "attending": false,
+      "guests": 1,
+      "song": "",
+      "message": "No podré ir, pero os deseo lo mejor",
+      "createdAt": "2026-05-27T18:05:00.000Z"
+    }
+  ]
+}
