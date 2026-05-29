@@ -3,275 +3,672 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nuestra boda</title>
+  <title>Nuestra Boda</title>
   <meta name="description" content="Web de boda con información, RSVP y playlist." />
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+    :root {
+      --bg: #0c0c10;
+      --surface: rgba(255,255,255,0.07);
+      --surface-strong: rgba(255,255,255,0.11);
+      --border: rgba(255,255,255,0.13);
+      --text: #f4f0e8;
+      --muted: rgba(244,240,232,0.68);
+      --faint: rgba(244,240,232,0.38);
+      --accent: #d4aa6a;
+      --accent-hover: #c49a55;
+      --shadow: 0 24px 64px rgba(0,0,0,0.32);
+      --font-display: "Cormorant Garamond", Georgia, serif;
+      --font-body: "Manrope", system-ui, sans-serif;
+      --radius-sm: 14px;
+      --radius-md: 22px;
+      --radius-lg: 32px;
+      --t: 220ms cubic-bezier(0.16,1,0.3,1);
+      --container: 1100px;
+    }
+    [data-theme="light"] {
+      --bg: #f7f3ec;
+      --surface: rgba(255,255,255,0.68);
+      --surface-strong: rgba(255,255,255,0.92);
+      --border: rgba(20,18,14,0.09);
+      --text: #16140f;
+      --muted: rgba(22,20,15,0.66);
+      --faint: rgba(22,20,15,0.35);
+      --accent: #a07232;
+      --accent-hover: #8a5e25;
+      --shadow: 0 20px 56px rgba(20,16,10,0.10);
+    }
 
-  <link rel="stylesheet" href="./styles.css" />
-  <script defer src="./app.js"></script>
+    /* ============================================================
+       BASE
+    ============================================================ */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:none;text-size-adjust:none}
+    body{min-height:100dvh;font-family:var(--font-body);font-size:clamp(1rem,.96rem + .2vw,1.1rem);color:var(--text);background:var(--bg);line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    img,video,iframe{display:block;max-width:100%}
+    a{color:inherit;text-decoration:none}
+    button,input,select,textarea{font:inherit;color:inherit}
+    h1,h2,h3{text-wrap:balance;line-height:1}
+    p,li{text-wrap:pretty;max-width:68ch}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+    /* ============================================================
+       BACKGROUND SLIDER
+    ============================================================ */
+    .bg-slider,.bg-overlay{position:fixed;inset:0;z-index:-2;pointer-events:none}
+    .bg-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transform:scale(1.06);transition:opacity 1600ms ease,transform 7000ms ease}
+    .bg-slide.active{opacity:1;transform:scale(1)}
+    .bg-overlay{z-index:-1;background:linear-gradient(175deg,rgba(12,12,16,.52) 0%,rgba(12,12,16,.78) 100%);backdrop-filter:blur(1.5px)}
+    [data-theme="light"] .bg-overlay{background:linear-gradient(175deg,rgba(247,243,236,.56) 0%,rgba(247,243,236,.84) 100%)}
+
+    /* ============================================================
+       LAYOUT
+    ============================================================ */
+    .container{width:min(calc(100% - 2rem),var(--container));margin-inline:auto}
+    .section{padding:clamp(4rem,9vw,7.5rem) 0}
+    .grid-two{display:grid;gap:1rem}
+    @media(min-width:800px){.grid-two{grid-template-columns:1fr 1fr;align-items:start}}
+
+    /* ============================================================
+       HEADER & NAV
+    ============================================================ */
+    .site-header{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--border);backdrop-filter:blur(18px) saturate(1.4);background:rgba(12,12,16,.18)}
+    [data-theme="light"] .site-header{background:rgba(247,243,236,.45)}
+    .nav{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .brand{display:inline-flex;align-items:center;gap:.75rem;font-weight:800;font-size:.95rem;letter-spacing:.03em}
+    .brand-mark{width:40px;height:40px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border);background:var(--surface);font-family:var(--font-display);font-size:1.3rem}
+    .menu{display:none;gap:1.4rem}
+    @media(min-width:700px){.menu{display:flex}}
+    .menu a{color:var(--muted);font-size:.9rem;font-weight:600;transition:color var(--t)}
+    .menu a:hover{color:var(--text)}
+    .theme-btn{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:1.1rem;transition:background var(--t)}
+    .theme-btn:hover{background:var(--surface-strong)}
+
+    /* ============================================================
+       GLASS PANELS / CARDS
+    ============================================================ */
+    .panel,.card,.form-panel,.timeline-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);backdrop-filter:blur(16px);box-shadow:var(--shadow)}
+    .panel,.form-panel{padding:clamp(1.25rem,4vw,2rem)}
+    .glass{background:linear-gradient(160deg,var(--surface-strong),var(--surface))}
+
+    /* ============================================================
+       TYPOGRAPHY COMPONENTS
+    ============================================================ */
+    .eyebrow{display:block;margin-bottom:.7rem;color:var(--accent);text-transform:uppercase;letter-spacing:.22em;font-size:.76rem;font-weight:800}
+    h2{font-family:var(--font-display);font-size:clamp(2.2rem,5.5vw,4rem);letter-spacing:-.02em;margin-bottom:.9rem}
+    .panel p,.card p{color:var(--muted);margin-top:.5rem}
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    .hero{min-height:94vh;display:grid;align-items:center}
+    .hero__title{font-family:var(--font-display);font-size:clamp(3.4rem,9.5vw,7.5rem);letter-spacing:-.03em;line-height:.93}
+    .hero__sub{margin-top:1.1rem;font-size:clamp(.95rem,2vw,1.1rem);color:var(--muted);max-width:56ch}
+    .hero-actions{margin-top:1.8rem;display:flex;flex-wrap:wrap;gap:.8rem}
+
+    /* ============================================================
+       BUTTONS
+    ============================================================ */
+    .btn{min-height:48px;padding:.85rem 1.35rem;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border-radius:999px;border:1px solid var(--border);cursor:pointer;font-weight:700;font-size:.92rem;transition:transform var(--t),background var(--t),border-color var(--t),color var(--t),box-shadow var(--t)}
+    .btn:hover{transform:translateY(-2px)}
+    .btn:active{transform:translateY(0)}
+    .btn-primary{background:var(--accent);color:#0c0c10;border-color:transparent}
+    .btn-primary:hover{background:var(--accent-hover)}
+    .btn-ghost{background:var(--surface-strong)}
+    .btn-full{width:100%}
+
+    /* ============================================================
+       DETAILS CARDS
+    ============================================================ */
+    .cards{display:grid;gap:1rem}
+    @media(min-width:700px){.cards{grid-template-columns:repeat(3,1fr)}}
+    .card{padding:1.3rem}
+    .card-label{display:block;margin-bottom:.65rem;color:var(--accent);font-size:.76rem;text-transform:uppercase;letter-spacing:.18em;font-weight:800}
+    .card h3{font-size:1.15rem;margin-bottom:.4rem}
+
+    /* ============================================================
+       TIMELINE
+    ============================================================ */
+    .timeline-list{display:grid;gap:.9rem}
+    .timeline-item{padding:1.1rem 1.25rem;display:grid;grid-template-columns:80px 1fr;gap:1rem;align-items:center}
+    .timeline-time{font-weight:800;color:var(--accent)}
+    .timeline-item h3{font-size:1.1rem;margin-bottom:.3rem}
+    .timeline-item p{color:var(--muted);font-size:.93rem;max-width:none}
+
+    /* ============================================================
+       MUSIC
+    ============================================================ */
+    .music-actions{margin-top:1.4rem;display:flex;flex-wrap:wrap;gap:.75rem}
+    .spotify-wrap{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}
+
+    /* ============================================================
+       RSVP STATS
+    ============================================================ */
+    .stats{margin-top:1.4rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+    .stat{padding:1rem;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,.04);text-align:center}
+    [data-theme="light"] .stat{background:rgba(255,255,255,.55)}
+    .stat strong{display:block;font-size:1.75rem;font-weight:800}
+    .stat span{font-size:.8rem;color:var(--muted)}
+
+    /* ============================================================
+       RSVP FORM
+    ============================================================ */
+    .form-panel{display:grid;gap:1rem}
+    .field{display:grid;gap:.4rem}
+    .field label{font-weight:700;font-size:.92rem}
+    .field input,.field select,.field textarea{padding:.85rem 1rem;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--text);outline:none;transition:border-color var(--t),box-shadow var(--t);width:100%}
+    [data-theme="light"] .field input,[data-theme="light"] .field select,[data-theme="light"] .field textarea{background:rgba(255,255,255,.8)}
+    .field input:focus,.field select,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(212,170,106,.15)}
+    .form-note{font-size:.86rem;color:var(--muted)}
+
+    /* ============================================================
+       NOTIFICATION TOAST
+    ============================================================ */
+    .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);z-index:100;padding:.9rem 1.4rem;border-radius:999px;border:1px solid var(--border);background:var(--surface-strong);backdrop-filter:blur(18px);box-shadow:var(--shadow);font-weight:700;font-size:.92rem;opacity:0;transition:transform .5s cubic-bezier(.16,1,.3,1),opacity .5s ease;white-space:nowrap;max-width:90vw;text-align:center;pointer-events:none}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+    .toast.success{border-color:rgba(100,200,120,.35);color:#7fcf90}
+    .toast.error{border-color:rgba(220,90,90,.35);color:#e08888}
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .site-footer{padding:2.5rem 0 3.5rem;color:var(--muted);border-top:1px solid var(--border)}
+    .footer-inner{display:flex;flex-direction:column;gap:.75rem;font-size:.9rem}
+    @media(min-width:700px){.footer-inner{flex-direction:row;justify-content:space-between;align-items:center}}
+
+    /* ============================================================
+       SCROLL REVEAL
+    ============================================================ */
+    .reveal{opacity:0;clip-path:inset(0 0 20% 0);transition:opacity 750ms cubic-bezier(.16,1,.3,1),clip-path 900ms cubic-bezier(.16,1,.3,1)}
+    .reveal.is-visible{opacity:1;clip-path:inset(0 0 0 0)}
+    .reveal-d1{transition-delay:80ms}
+    .reveal-d2{transition-delay:160ms}
+    .reveal-d3{transition-delay:240ms}
+
+    @media(prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      .bg-slide,.reveal,.btn,.toast{transition:none!important}
+    }
+  </style>
 </head>
 <body>
-  <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
+  <!-- ======================================================
+       BACKGROUND PHOTO SLIDER
+  ====================================================== -->
   <div class="bg-slider" aria-hidden="true">
-    <div class="bg-slide active" style="background-image:url('https://picsum.photos/seed/boda1/1600/2200');"></div>
-    <div class="bg-slide" style="background-image:url('https://picsum.photos/seed/boda2/1600/2200');"></div>
-    <div class="bg-slide" style="background-image:url('https://picsum.photos/seed/boda3/1600/2200');"></div>
+    <div class="bg-slide active" style="background-image:url('https://picsum.photos/seed/wed1/1600/2000')"></div>
+    <div class="bg-slide" style="background-image:url('https://picsum.photos/seed/wed5/1600/2000')"></div>
+    <div class="bg-slide" style="background-image:url('https://picsum.photos/seed/wed8/1600/2000')"></div>
+    <div class="bg-slide" style="background-image:url('https://picsum.photos/seed/wed12/1600/2000')"></div>
   </div>
   <div class="bg-overlay" aria-hidden="true"></div>
 
+  <!-- TOAST -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ======================================================
+       HEADER
+  ====================================================== -->
   <header class="site-header">
     <div class="container nav">
-      <a class="brand" href="#inicio" aria-label="Ir al inicio">
+      <a class="brand" href="#inicio" aria-label="Inicio">
         <span class="brand-mark">F</span>
-        <span>Francisco & Pareja</span>
+        <span>Francisco &amp; María</span>
       </a>
-
-      <nav class="menu" aria-label="Navegación principal">
-        <a href="#historia">Nosotros</a>
-        <a href="#dia">El día</a>
+      <nav class="menu" aria-label="Navegación">
+        <a href="#nosotros">Nosotros</a>
+        <a href="#detalles">El día</a>
         <a href="#musica">Música</a>
         <a href="#rsvp">RSVP</a>
       </nav>
-
-      <button class="theme-toggle" type="button" aria-label="Cambiar tema" data-theme-toggle>
-        <span class="theme-toggle__sun">☀</span>
-        <span class="theme-toggle__moon">☾</span>
-      </button>
+      <button class="theme-btn" type="button" aria-label="Cambiar tema" id="themeBtn">☾</button>
     </div>
   </header>
 
-  <main id="contenido">
-    <section class="hero section" id="inicio">
-      <div class="container hero__content">
-        <p class="eyebrow reveal">Nos casamos</p>
-        <h1 class="hero__title reveal">Una celebración íntima, bonita y muy nuestra.</h1>
-        <p class="hero__text reveal">
-          Queremos compartir este día contigo. Aquí encontrarás la información importante,
-          la playlist y la confirmación de asistencia.
-        </p>
+  <main id="inicio">
 
-        <div class="hero__actions reveal">
-          <a class="btn btn--primary" href="#rsvp">Confirmar asistencia</a>
-          <a class="btn btn--ghost" href="#dia">Ver detalles</a>
+    <!-- ======================================================
+         HERO
+    ====================================================== -->
+    <section class="hero section">
+      <div class="container">
+        <p class="eyebrow reveal">Nos casamos</p>
+        <h1 class="hero__title reveal reveal-d1">Una celebración<br>muy nuestra.</h1>
+        <p class="hero__sub reveal reveal-d2">
+          Aquí encontrarás todo lo que necesitas saber: lugar, horarios, playlist
+          y confirmación de asistencia.
+        </p>
+        <div class="hero-actions reveal reveal-d3">
+          <a class="btn btn-primary" href="#rsvp">Confirmar asistencia</a>
+          <a class="btn btn-ghost" href="#detalles">Ver detalles</a>
         </div>
       </div>
     </section>
 
-    <section class="section story" id="historia">
+    <!-- ======================================================
+         NOSOTROS
+    ====================================================== -->
+    <section class="section" id="nosotros">
       <div class="container grid-two">
         <div class="panel glass reveal">
-          <p class="eyebrow">Nuestra historia</p>
-          <h2>Un día para celebrar lo importante.</h2>
+          <span class="eyebrow">Nuestra historia</span>
+          <h2>El día más esperado.</h2>
           <p>
-            Este espacio está pensado para que tengas todo claro y en un solo sitio:
-            fecha, lugar, horarios, música y confirmación.
+            Llevamos tiempo soñando con este momento y queremos celebrarlo rodeados
+            de las personas que más queremos. Gracias por ser parte de nuestra vida.
           </p>
         </div>
-
-        <div class="panel quote reveal">
-          <p>
-            “Nos hace ilusión celebrarlo con la gente que forma parte de nuestra vida.”
+        <div class="panel reveal" style="display:grid;place-items:center;min-height:220px">
+          <p style="font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.8rem);text-align:center;padding:1rem;color:var(--text);max-width:none">
+            &ldquo;Celebrar juntos es la mejor forma de recordarlo para siempre.&rdquo;
           </p>
         </div>
       </div>
     </section>
 
-    <section class="section details" id="dia">
+    <!-- ======================================================
+         DETALLES
+    ====================================================== -->
+    <section class="section" id="detalles">
       <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow">Información</p>
+        <div class="reveal">
+          <span class="eyebrow">Información</span>
           <h2>Datos del evento</h2>
         </div>
 
         <div class="cards">
-          <article class="card reveal">
-            <span class="card__label">Fecha</span>
-            <h3>12 de septiembre de 2026</h3>
-            <p>Añade aquí la fecha real de vuestra boda.</p>
+          <article class="card reveal reveal-d1">
+            <span class="card-label">Fecha</span>
+            <h3>12 septiembre 2026</h3>
+            <p>Anota la fecha en tu calendario.</p>
           </article>
-
-          <article class="card reveal">
-            <span class="card__label">Lugar</span>
-            <h3>Finca o salón</h3>
-            <p>Añade aquí dirección, ciudad y un enlace a Google Maps si quieres.</p>
+          <article class="card reveal reveal-d2">
+            <span class="card-label">Lugar</span>
+            <h3>Finca El Jardín</h3>
+            <p>Calle Real, 14 &mdash; Lorca, Murcia.</p>
           </article>
-
-          <article class="card reveal">
-            <span class="card__label">Horario</span>
-            <h3>18:00 · Ceremonia</h3>
-            <p>19:30 · Cóctel · 21:00 · Cena · 00:00 · Fiesta.</p>
+          <article class="card reveal reveal-d3">
+            <span class="card-label">Código de vestimenta</span>
+            <h3>Elegante-informal</h3>
+            <p>Sin etiqueta estricta, pero guapa y arreglada.</p>
           </article>
         </div>
-      </div>
-    </section>
 
-    <section class="section timeline">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow">Plan del día</p>
-          <h2>Así será la celebración</h2>
-        </div>
-
-        <div class="timeline-list">
+        <!-- TIMELINE -->
+        <div style="margin-top:1rem;display:grid;gap:1rem">
           <div class="timeline-item reveal">
-            <span>18:00</span>
+            <span class="timeline-time">18:00</span>
             <div>
               <h3>Ceremonia</h3>
-              <p>Momento principal del día.</p>
+              <p>El momento principal del día.</p>
             </div>
           </div>
-
-          <div class="timeline-item reveal">
-            <span>19:30</span>
+          <div class="timeline-item reveal reveal-d1">
+            <span class="timeline-time">19:30</span>
             <div>
               <h3>Cóctel</h3>
-              <p>Brindis, fotos y primer rato con todos.</p>
+              <p>Brindis y fotografías con todos los invitados.</p>
             </div>
           </div>
-
-          <div class="timeline-item reveal">
-            <span>21:00</span>
+          <div class="timeline-item reveal reveal-d2">
+            <span class="timeline-time">21:00</span>
             <div>
               <h3>Cena</h3>
-              <p>La parte tranquila antes de la fiesta.</p>
+              <p>Mesa y velada tranquila antes de la fiesta.</p>
             </div>
           </div>
-
-          <div class="timeline-item reveal">
-            <span>00:00</span>
+          <div class="timeline-item reveal reveal-d3">
+            <span class="timeline-time">00:00</span>
             <div>
-              <h3>Fiesta</h3>
-              <p>Música, baile y barra libre.</p>
+              <h3>Fiesta &amp; barra libre</h3>
+              <p>Música, baile y lo que queda de noche.</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section music" id="musica">
+    <!-- ======================================================
+         MÚSICA
+    ====================================================== -->
+    <section class="section" id="musica">
       <div class="container grid-two">
         <div class="panel glass reveal">
-          <p class="eyebrow">Playlist</p>
-          <h2>La banda sonora del día</h2>
+          <span class="eyebrow">Playlist</span>
+          <h2>La banda sonora del día.</h2>
           <p>
-            Sustituye el iframe por tu playlist y cambia también el enlace del botón para
-            que la gente pueda abrir la lista en Spotify y añadir canciones.
+            Esta es la lista que sonará durante la celebración. Puedes añadir
+            canciones directamente desde Spotify.
           </p>
-
           <div class="music-actions">
             <a
-              class="btn btn--primary"
+              class="btn btn-primary"
               href="https://open.spotify.com/playlist/TU_PLAYLIST_ID"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Abrir playlist
-            </a>
-
+              target="_blank" rel="noopener noreferrer"
+            >Abrir en Spotify</a>
             <a
-              class="btn btn--ghost"
+              class="btn btn-ghost"
               href="https://open.spotify.com/playlist/TU_PLAYLIST_ID"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Añadir canción
-            </a>
+              target="_blank" rel="noopener noreferrer"
+            >Añadir canción</a>
           </div>
         </div>
-
-        <div class="panel spotify reveal">
+        <div class="spotify-wrap reveal reveal-d1">
+          <!-- SUSTITUYE TU_PLAYLIST_ID por el ID real de tu playlist -->
           <iframe
-            title="Playlist de Spotify"
-            style="border-radius:24px"
+            title="Playlist de la boda"
             src="https://open.spotify.com/embed/playlist/TU_PLAYLIST_ID?utm_source=generator"
             width="100%"
-            height="352"
+            height="380"
             frameborder="0"
             allowfullscreen=""
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
+            style="border-radius:var(--radius-lg)"
           ></iframe>
         </div>
       </div>
     </section>
 
-    <section class="section rsvp" id="rsvp">
+    <!-- ======================================================
+         RSVP
+    ====================================================== -->
+    <section class="section" id="rsvp">
       <div class="container grid-two">
-        <div class="panel glass reveal">
-          <p class="eyebrow">Confirmación</p>
-          <h2>Responde en un minuto</h2>
-          <p>
-            Esta versión usa <code>rsvp.json</code> para pintar el estado actual. El formulario
-            genera una respuesta estructurada y te la envía por WhatsApp para que luego puedas
-            pegarla en el JSON del repositorio.
-          </p>
 
-          <div class="stats" id="stats">
+        <!-- STATS -->
+        <div class="panel glass reveal">
+          <span class="eyebrow">Confirmaciones</span>
+          <h2>¿Vendrás?</h2>
+          <p>
+            Rellena el formulario.
+          </p>
+          <div class="stats" id="statsBox">
             <div class="stat">
-              <strong id="totalGuests">0</strong>
-              <span>Invitados confirmados</span>
+              <strong id="statTotal">–</strong>
+              <span>Invitados</span>
             </div>
             <div class="stat">
-              <strong id="totalComing">0</strong>
-              <span>Respuestas sí</span>
+              <strong id="statYes">–</strong>
+              <span>Confirman sí</span>
             </div>
             <div class="stat">
-              <strong id="totalDeclined">0</strong>
-              <span>Respuestas no</span>
+              <strong id="statNo">–</strong>
+              <span>No podrán ir</span>
             </div>
           </div>
+
+          <!-- Lista de nombres -->
+          <div id="nameList" style="margin-top:1.25rem;display:grid;gap:.5rem"></div>
         </div>
 
-        <form class="panel form-panel reveal" id="rsvpForm">
-          <label>
-            Nombre y apellidos
-            <input type="text" id="name" name="name" placeholder="Tu nombre" required />
-          </label>
+        <!-- FORMULARIO -->
+        <form class="form-panel reveal reveal-d1" id="rsvpForm" novalidate>
 
-          <label>
-            ¿Vendrás?
-            <select id="attending" name="attending" required>
-              <option value="si">Sí, allí estaré</option>
-              <option value="no">No podré ir</option>
+          <div class="field">
+            <label for="fname">Nombre y apellidos *</label>
+            <input type="text" id="fname" name="name" placeholder="Tu nombre completo" required />
+          </div>
+
+          <div class="field">
+            <label for="fattending">¿Asistirás? *</label>
+            <select id="fattending" name="attending" required>
+              <option value="si">✓ Sí, allí estaré</option>
+              <option value="no">✗ No podré ir</option>
             </select>
-          </label>
+          </div>
 
-          <label>
-            Número de asistentes
-            <input type="number" id="guests" name="guests" min="1" max="6" value="1" required />
-          </label>
+          <div class="field">
+            <label for="fguests">Número de personas (contándote a ti)</label>
+            <input type="number" id="fguests" name="guests" min="1" max="8" value="1" />
+          </div>
 
-          <label>
-            Canción sugerida
-            <input type="text" id="song" name="song" placeholder="Tu canción favorita" />
-          </label>
+          <div class="field">
+            <label for="fsong">Canción que no puede faltar</label>
+            <input type="text" id="fsong" name="song" placeholder="Artista – Título" />
+          </div>
 
-          <label>
-            Mensaje
-            <textarea id="message" name="message" rows="4" placeholder="Escribe algo bonito"></textarea>
-          </label>
+          <div class="field">
+            <label for="fmsg">Mensaje para los novios</label>
+            <textarea id="fmsg" name="message" rows="3" placeholder="Escribe algo bonito…"></textarea>
+          </div>
 
-          <button class="btn btn--primary btn--full" type="submit">
-            Enviar respuesta
+          <button class="btn btn-primary btn-full" type="submit" id="submitBtn">
+            Confirmar respuesta
           </button>
 
           <p class="form-note" id="formNote">
-            Al pulsar, se abrirá WhatsApp con tu respuesta preparada.
+            Al enviar, tu respuesta quedará guardada.
           </p>
         </form>
       </div>
     </section>
+
   </main>
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p>Con muchísima ilusión, Francisco & Pareja.</p>
-      <a href="#inicio">Volver arriba</a>
+      <p>Con todo el amor del mundo — Paqui &amp; Fran</p>
+      <a class="btn btn-ghost" href="#inicio" style="font-size:.85rem;min-height:38px;padding:.5rem 1rem">↑ Volver arriba</a>
     </div>
   </footer>
+
+  <script>
+    /* ============================================================
+       CONFIG — CAMBIA ESTOS VALORES
+    ============================================================ */
+    const GITHUB_OWNER  = "TU_USUARIO";       // tu usuario de GitHub
+    const GITHUB_REPO   = "TU_REPOSITORIO";   // nombre del repo
+    const GITHUB_BRANCH = "main";              // rama (main o master)
+    const GITHUB_TOKEN  = "ghp_XXXXXXXXXX";   // token Personal Access (public_repo)
+    const RSVP_PATH     = "rsvp.json";        // ruta del archivo en el repo
+
+    /* ============================================================
+       TEMA CLARO/OSCURO
+    ============================================================ */
+    const html = document.documentElement;
+    const themeBtn = document.getElementById("themeBtn");
+    let theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    html.setAttribute("data-theme", theme);
+    themeBtn.textContent = theme === "dark" ? "☀" : "☾";
+    themeBtn.addEventListener("click", () => {
+      theme = theme === "dark" ? "light" : "dark";
+      html.setAttribute("data-theme", theme);
+      themeBtn.textContent = theme === "dark" ? "☀" : "☾";
+    });
+
+    /* ============================================================
+       FONDO — SLIDER DE FOTOS
+    ============================================================ */
+    const slides = document.querySelectorAll(".bg-slide");
+    let activeSlide = 0;
+    setInterval(() => {
+      slides[activeSlide].classList.remove("active");
+      activeSlide = (activeSlide + 1) % slides.length;
+      slides[activeSlide].classList.add("active");
+    }, 5000);
+
+    /* ============================================================
+       SCROLL REVEAL — Intersection Observer
+    ============================================================ */
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("is-visible"); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+    /* ============================================================
+       TOAST
+    ============================================================ */
+    const toastEl = document.getElementById("toast");
+    function showToast(msg, type = "success") {
+      toastEl.textContent = msg;
+      toastEl.className = `toast ${type} show`;
+      setTimeout(() => { toastEl.className = "toast"; }, 3500);
+    }
+
+    /* ============================================================
+       GITHUB API — leer rsvp.json
+    ============================================================ */
+    async function fetchRSVP() {
+      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${RSVP_PATH}`;
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json"
+        }
+      });
+      if (!res.ok) throw new Error("No se pudo leer rsvp.json");
+      const meta = await res.json();
+      const data = JSON.parse(atob(meta.content));
+      return { data, sha: meta.sha };
+    }
+
+    /* ============================================================
+       GITHUB API — escribir rsvp.json
+    ============================================================ */
+    async function writeRSVP(data, sha) {
+      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${RSVP_PATH}`;
+      const body = {
+        message: `RSVP: ${data.respuestas.at(-1).name}`,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+        sha,
+        branch: GITHUB_BRANCH
+      };
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Error al guardar");
+      }
+    }
+
+    /* ============================================================
+       RENDERIZAR ESTADÍSTICAS
+    ============================================================ */
+    function renderStats(respuestas) {
+      const coming   = respuestas.filter(r => r.attending === true);
+      const declined = respuestas.filter(r => r.attending === false);
+      const total    = coming.reduce((s, r) => s + (r.guests || 1), 0);
+
+      document.getElementById("statTotal").textContent = total;
+      document.getElementById("statYes").textContent   = coming.length;
+      document.getElementById("statNo").textContent    = declined.length;
+
+      const list = document.getElementById("nameList");
+      list.innerHTML = "";
+      if (respuestas.length === 0) {
+        list.innerHTML = `<p style="color:var(--faint);font-size:.88rem">Sé el primero en confirmar.</p>`;
+        return;
+      }
+      respuestas.slice().reverse().forEach(r => {
+        const chip = document.createElement("div");
+        chip.style.cssText = "display:flex;align-items:center;gap:.5rem;padding:.55rem .85rem;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:.86rem;font-weight:600;animation:fadeIn .4s ease";
+        const dot = r.attending ? "#7fcf90" : "#e08888";
+        chip.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0"></span> ${r.name}${r.attending && r.guests > 1 ? ` <span style="color:var(--faint)">(+${r.guests - 1})</span>` : ""}`;
+        list.appendChild(chip);
+      });
+    }
+
+    /* ============================================================
+       ARRANCAR: cargar datos al inicio
+    ============================================================ */
+    let currentSha = null;
+    let currentData = { respuestas: [] };
+
+    (async () => {
+      try {
+        const { data, sha } = await fetchRSVP();
+        currentData = data;
+        currentSha  = sha;
+        renderStats(data.respuestas || []);
+      } catch (e) {
+        renderStats([]);
+        console.warn("Error cargando RSVP:", e.message);
+      }
+    })();
+
+    /* ============================================================
+       FORMULARIO — enviar RSVP
+    ============================================================ */
+    const form      = document.getElementById("rsvpForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const formNote  = document.getElementById("formNote");
+
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+
+      const name      = document.getElementById("fname").value.trim();
+      const attending = document.getElementById("fattending").value === "si";
+      const guests    = Number(document.getElementById("fguests").value) || 1;
+      const song      = document.getElementById("fsong").value.trim();
+      const message   = document.getElementById("fmsg").value.trim();
+
+      if (!name) {
+        showToast("Escribe tu nombre, por favor.", "error");
+        return;
+      }
+
+      // Comprobar duplicado
+      const exists = currentData.respuestas.some(
+        r => r.name.toLowerCase() === name.toLowerCase()
+      );
+      if (exists) {
+        showToast("Ya hay una respuesta con ese nombre.", "error");
+        return;
+      }
+
+      const entry = {
+        name,
+        attending,
+        guests: attending ? guests : 0,
+        song,
+        message,
+        createdAt: new Date().toISOString()
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Guardando…";
+
+      try {
+        // Volver a leer para tener el sha más reciente (evita conflictos)
+        const { data: fresh, sha: freshSha } = await fetchRSVP();
+        fresh.respuestas.push(entry);
+
+        await writeRSVP(fresh, freshSha);
+
+        currentData = fresh;
+        currentSha  = freshSha;
+
+        renderStats(currentData.respuestas);
+        form.reset();
+        showToast("¡Respuesta guardada! Gracias 🎉", "success");
+        formNote.textContent = "Tu confirmación ya está guardada.";
+      } catch (err) {
+        showToast("Error al guardar: " + err.message, "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Confirmar respuesta";
+      }
+    });
+
+    /* micro-animación fadeIn */
+    const style = document.createElement("style");
+    style.textContent = "@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}";
+    document.head.appendChild(style);
+  </script>
 </body>
 </html>
